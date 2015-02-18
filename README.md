@@ -1,6 +1,9 @@
 pahole for gdb
 ==============
 
+I believe this code ships with gdb in Fedora, but Debian doesn’t seem
+to include it for some reason.
+
 Put the two python scripts somewhere handy, then copy gdbinit to
 ~/.gdbinit (or add the python scripts to your existing gdbinit) after
 editing the python include path in your ~/.gdbinit to add the

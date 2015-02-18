@@ -26,3 +26,7 @@ Reading symbols from test-cxx...done.
 }
 (gdb) quit
 ```
+
+If you’re using gdb version 7.8 or about, then you’ll want the python3
+scripts, as the syntax of the print function has changed and gdb now
+invokes python3 by default.

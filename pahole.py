@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
 import gdb
 import gdb.types
 
@@ -33,7 +34,7 @@ It prints the type and displays comments showing where holes are."""
         tag = atype.tag
         if tag is None:
             tag = ''
-        print '/* %4d     */ %sstruct %s {' % (atype.strip_typedefs().sizeof, ' ' * (2 * level), tag)
+        print ('/* %4d     */ %sstruct %s {' % (atype.strip_typedefs().sizeof, ' ' * (2 * level), tag))
         endpos = 0
         for field in atype.fields():
             # Skip static fields
@@ -45,7 +46,7 @@ It prints the type and displays comments showing where holes are."""
             # Detect hole
             if endpos < field.bitpos:
                 hole = field.bitpos - endpos
-                print '/* XXX %d bit hole, try to pack */' % hole
+                print ('/* XXX %d bit hole, try to pack */' % hole)
 
             # Are we a bitfield?
             if field.bitsize > 0:
@@ -56,17 +57,17 @@ It prints the type and displays comments showing where holes are."""
                 else:
                     fieldsize = 8 * ftype.sizeof # will get packing wrong for structs
 
-            print '/* %3d %4d */' % (field.bitpos // 8, fieldsize // 8),
+            print ('/* %3d %4d */' % (field.bitpos // 8, fieldsize // 8), end="")
             endpos = field.bitpos + fieldsize
 
 #            if ftype.code == gdb.TYPE_CODE_STRUCT:
 #                self.pahole (ftype, level + 1, field.name)
 #            else:
-            print ' ' * (4 + 2 * level),
-            print '%s %s' % (str (ftype), field.name)
+            print (' ' * (4 + 2 * level), end="")
+            print ('%s %s' % (str (ftype), field.name))
 
-        print ' ' * (14 + 2 * level),
-        print '} %s' % name
+        print (' ' * (14 + 2 * level), end="")
+        print ('} %s' % name)
 
     def invoke (self, arg, from_tty):
         argv = gdb.string_to_argv(arg)

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import gdb
 
 class Offsets(gdb.Command):
@@ -11,9 +12,9 @@ class Offsets(gdb.Command):
 
         stype = gdb.lookup_type(argv[0])
 
-        print argv[0], '{'
+        print (argv[0], '{')
         for field in stype.fields():
-            print '    %s => %d' % (field.name, field.bitpos//8)
-        print '}'
+            print ('    %s => %d' % (field.name, field.bitpos//8))
+        print ('}')
 
 Offsets()

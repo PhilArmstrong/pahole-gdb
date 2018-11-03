@@ -34,7 +34,8 @@ It prints the type and displays comments showing where holes are."""
         tag = atype.tag
         if tag is None:
             tag = ''
-        print ('/* %4d     */ %sstruct %s {' % (atype.strip_typedefs().sizeof, ' ' * (2 * level), tag))
+        kind = 'struct' if atype.code == gdb.TYPE_CODE_STRUCT else 'union'
+        print ('/* %4d     */ %s%s %s {' % (atype.sizeof, ' ' * (2 * level), kind, tag))
         endpos = 0
         for field in atype.fields():
             # Skip static fields
@@ -52,7 +53,7 @@ It prints the type and displays comments showing where holes are."""
             if field.bitsize > 0:
                 fieldsize = field.bitsize
             else:
-                if ftype.code == gdb.TYPE_CODE_STRUCT and len(ftype.fields()) == 0:
+                if (ftype.code == gdb.TYPE_CODE_STRUCT or ftype.code == gdb.TYPE_CODE_UNION) and len(ftype.fields()) == 0:
                     fieldsize = 0 # empty struct
                 else:
                     fieldsize = 8 * ftype.sizeof # will get packing wrong for structs
@@ -75,8 +76,8 @@ It prints the type and displays comments showing where holes are."""
             raise gdb.GdbError('pahole takes 1 arguments.')
         stype = gdb.lookup_type (argv[0])
         ptype = stype.strip_typedefs()
-        if ptype.code != gdb.TYPE_CODE_STRUCT:
-            raise '%s is not a struct type' % arg
+        if ptype.code != gdb.TYPE_CODE_STRUCT and ptype.code != gdb.TYPE_CODE_UNION:
+            raise gdb.GdbError('%s is not a struct/union type: %s' % (arg, ptype.code))
         self.pahole (ptype, 0, '')
 
 Pahole()

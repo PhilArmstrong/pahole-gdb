@@ -18,6 +18,7 @@
 from __future__ import print_function
 import gdb
 import gdb.types
+import math
 
 class Pahole (gdb.Command):
     """Show the holes in a structure.
@@ -28,14 +29,16 @@ It prints the type and displays comments showing where holes are."""
         super (Pahole, self).__init__ ("pahole", gdb.COMMAND_DATA,
                                        gdb.COMPLETE_SYMBOL)
 
-    def pahole (self, atype, level, name):
+    def pahole (self, atype, level, name, walk=False, nested=False):
         if name is None:
             name = ''
         tag = atype.tag
         if tag is None:
             tag = ''
         kind = 'struct' if atype.code == gdb.TYPE_CODE_STRUCT else 'union'
-        print ('/* %4d     */ %s%s %s {' % (atype.sizeof, ' ' * (2 * level), kind, tag))
+        if nested == False:
+            print ('/* %4d     */ ' % atype.sizeof, end="")
+        print ('%s%s %s {' % ( ' ' * (2 * level), kind, tag))
         endpos = 0
         for field in atype.fields():
             # Skip static fields
@@ -46,10 +49,10 @@ It prints the type and displays comments showing where holes are."""
 
             # Detect hole
             if endpos < field.bitpos:
-                hole = (field.bitpos - endpos) // 8
-                print ('/* XXX %4d */ !!' % hole, end="")
-                print (' ' * (4 + 2 * level - 3), end="")
-                print ('char [%d] __%d_bit_padding__' % (hole, 8*hole))
+                hole = field.bitpos - endpos
+                print ('/* XXX %4d */ !!' % (hole // 8), end="")
+                print (' ' * (4 + 2 * level - 2), end="")
+                print ('char [%d] __%d_bit_padding__' % (math.ceil(hole / 8), hole))
 
             # Are we a bitfield?
             if field.bitsize > 0:
@@ -60,24 +63,31 @@ It prints the type and displays comments showing where holes are."""
                 else:
                     fieldsize = 8 * ftype.sizeof # will get packing wrong for structs
 
-            print ('/* %3d %4d */' % (field.bitpos // 8, fieldsize // 8), end="")
+            print ('/* %3d %4d */ ' % (field.bitpos // 8, fieldsize // 8), end="")
             endpos = field.bitpos + fieldsize
 
-#            if ftype.code == gdb.TYPE_CODE_STRUCT:
-#                self.pahole (ftype, level + 1, field.name)
-#            else:
-            print (' ' * (4 + 2 * level), end="")
-            print ('%s %s' % (str (ftype), field.name))
+            # Walk nested structure or print variable size (this is not a hole)
+            if walk == True and (ftype.code == gdb.TYPE_CODE_STRUCT or ftype.code == gdb.TYPE_CODE_UNION):
+                print ('  ', end="")
+                self.pahole (ftype, level + 1, field.name, walk=walk, nested=True)
+            else:
+                print (' ' * (4 + 2 * level), end="")
+                print ('%s %s' % (str (ftype), field.name),end="")
+                # Append bitfield size if non-standard
+                if fieldsize != ftype.sizeof * 8:
+                    print (':%d' % fieldsize)
+                else:
+                    print ('')
 
         # Check for padding at the end
         if endpos // 8 < atype.sizeof:
-            hole = atype.sizeof - endpos // 8
+            hole = 8 * atype.sizeof - endpos
             print ('/* XXX %4d */ !!' % hole, end="")
-            print (' ' * (4 + 2 * level - 3), end="")
-            print ('char [%d] __%d_bit_padding__' % (hole, 8*hole))
+            print (' ' * (4 + 2 * level - 2), end="")
+            print ('char [%d] __%d_bit_padding__' % (math.ceil(hole / 8), hole))
 
         print (' ' * (14 + 2 * level), end="")
-        print ('} %s' % name)
+        print (' } %s' % name)
 
     def invoke (self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
@@ -87,6 +97,10 @@ It prints the type and displays comments showing where holes are."""
         ptype = stype.strip_typedefs()
         if ptype.code != gdb.TYPE_CODE_STRUCT and ptype.code != gdb.TYPE_CODE_UNION:
             raise gdb.GdbError('%s is not a struct/union type: %s' % (arg, ptype.code))
-        self.pahole (ptype, 0, '')
+
+        # Should the entire object be walked recursively?
+        walk = len(argv) > 1 and argv[1] == "walk"
+
+        self.pahole (ptype, 0, argv[0], walk=walk)
 
 Pahole()

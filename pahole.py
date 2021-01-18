@@ -46,8 +46,10 @@ It prints the type and displays comments showing where holes are."""
 
             # Detect hole
             if endpos < field.bitpos:
-                hole = field.bitpos - endpos
-                print ('/* XXX %d bit hole, try to pack */' % hole)
+                hole = (field.bitpos - endpos) // 8
+                print ('/* XXX %4d */ !!' % hole, end="")
+                print (' ' * (4 + 2 * level - 3), end="")
+                print ('char __padding__[%d]' % hole)
 
             # Are we a bitfield?
             if field.bitsize > 0:

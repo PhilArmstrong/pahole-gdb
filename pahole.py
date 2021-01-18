@@ -49,7 +49,7 @@ It prints the type and displays comments showing where holes are."""
                 hole = (field.bitpos - endpos) // 8
                 print ('/* XXX %4d */ !!' % hole, end="")
                 print (' ' * (4 + 2 * level - 3), end="")
-                print ('char __padding__[%d]' % hole)
+                print ('char [%d] __%d_bit_padding__' % (hole, 8*hole))
 
             # Are we a bitfield?
             if field.bitsize > 0:
@@ -68,6 +68,13 @@ It prints the type and displays comments showing where holes are."""
 #            else:
             print (' ' * (4 + 2 * level), end="")
             print ('%s %s' % (str (ftype), field.name))
+
+        # Check for padding at the end
+        if endpos // 8 < atype.sizeof:
+            hole = atype.sizeof - endpos // 8
+            print ('/* XXX %4d */ !!' % hole, end="")
+            print (' ' * (4 + 2 * level - 3), end="")
+            print ('char [%d] __%d_bit_padding__' % (hole, 8*hole))
 
         print (' ' * (14 + 2 * level), end="")
         print ('} %s' % name)

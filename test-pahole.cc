@@ -15,6 +15,28 @@ public:
     void * getl() { return l; }
 };
 
+extern "C" {
+  typedef struct {
+    short a;
+    char b;
+    struct more_struct {
+      union union_x
+      {
+        char c[128];
+        struct s_y
+        {
+          char v;
+          char g1_1:7;
+        } y;
+      } x;
+      long e;
+      char s1_1:1;
+      char s1_2:1;
+      char s2:2;
+    } more;
+  } testStruct;
+}
+
 using namespace std;
 
 int main() {
@@ -24,5 +46,9 @@ int main() {
     cout << c.geti() << " ";
   }
   cout << endl;
+
+  testStruct a;
+  a.a = 100;
+  cout << a.a << endl;
   return 0;
 }

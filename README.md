@@ -13,21 +13,21 @@ Then invoke gdb on your compiled binary and check the offsets of your
 C++ or C classes and structs like so:
 
 ```
-$ gdb test-cxx
-GNU gdb (Debian 7.7.1+dfsg-5) 7.7.1
+$ gdb test-pahole
+GNU gdb (Debian 10.1-1.7) 10.1.90.20210103-git
 ...
-Reading symbols from test-cxx...done.
+Reading symbols from test-pahole...
 (gdb) pahole C
 /*   16     */ struct C {
-/*   0    4 */      int i
-/*   4    1 */      char j
-/* XXX 24 bit hole, try to pack */
-/*   8    8 */      void * l
-}
-(gdb) quit
+/*   0    4 */    int i
+/*   4    1 */    char j
+/* XXX    3 */ !! char [3] __24_bit_padding__
+/*   8    8 */    void * l
+              } 
+(gdb)
 ```
 
 Python compatibility
 --------------------
 
-The script should work on both gdb using Python 2 (gdb about <7.8) and Python 3.
+The script should work on both gdb using Python 2 (gdb versions <7.8 IIRC) and Python 3.

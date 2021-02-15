@@ -1,8 +1,9 @@
 pahole for gdb
 ==============
 
-I believe this code ships with gdb in Fedora, but Debian doesn’t seem
-to include it for some reason.
+This code was originally shipped alongside gdb by Fedora. It has since
+been extended by a number of contributors. It inherits the GPLv3 licence
+from the original Fedora python code.
 
 Put the two python scripts somewhere handy, then copy gdbinit to
 ~/.gdbinit (or add the python scripts to your existing gdbinit) after

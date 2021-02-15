@@ -92,7 +92,7 @@ It prints the type and displays comments showing where holes are."""
     def invoke (self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
         if len(argv) > 2:
-            raise gdb.GdbError('pahole takes 1 arguments.')
+            raise gdb.GdbError('pahole takes a type name and an optional "walk" argument.')
         stype = gdb.lookup_type (argv[0])
         ptype = stype.strip_typedefs()
         if ptype.code != gdb.TYPE_CODE_STRUCT and ptype.code != gdb.TYPE_CODE_UNION:

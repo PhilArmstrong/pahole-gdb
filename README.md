@@ -22,7 +22,7 @@ Reading symbols from test-pahole...
 /*   16     */ struct C {
 /*   0    4 */    int i
 /*   4    1 */    char j
-/* XXX    3 */ !! char [3] __24_bit_padding__
+/* XXX    3 */ !! __24_bit_padding__
 /*   8    8 */    void * l
               } 
 
@@ -30,7 +30,7 @@ Reading symbols from test-pahole...
 /*  152     */ struct testStruct {
 /*   0    2 */     short a
 /*   2    1 */     char b
-/* XXX    5 */ !!  char [5] __40_bit_padding__
+/* XXX    5 */ !!  __40_bit_padding__
 /*   8  144 */     testStruct::more_struct more
                } testStruct
 ```
@@ -42,22 +42,22 @@ When specifying `walk` right after the type name, `pahole` will walk your object
 /*  152     */ struct testStruct {
 /*   0    2 */     short a
 /*   2    1 */     char b
-/* XXX    5 */ !!  char [5] __40_bit_padding__
+/* XXX    5 */ !!  __40_bit_padding__
 /*   8  144 */     struct testStruct::more_struct {
 /*   0  128 */       union testStruct::more_struct::union_x {
 /*   0  128 */         char [128] c
 /*   0    2 */         struct testStruct::more_struct::union_x::s_y {
 /*   0    1 */           char v
 /*   1    0 */           char g1_1:7
-/* XXX    1 */ !!        char [1] __1_bit_padding__
+/* XXX    0 */ !!        __1_bit_padding__
                      } y
-/* XXX 1008 */ !!      char [126] __1008_bit_padding__
+/* XXX  126 */ !!      __1008_bit_padding__
                    } x
 /* 128    8 */       long e
 /* 136    0 */       char s1_1:1
 /* 136    0 */       char s1_2:1
 /* 136    0 */       char s2:2
-/* XXX   60 */ !!    char [8] __60_bit_padding__
+/* XXX    7 */ !!    __60_bit_padding__
                  } more
                } testStruct
 ```
